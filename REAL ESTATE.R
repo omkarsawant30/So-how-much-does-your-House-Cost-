@@ -1,10 +1,11 @@
+#First we need to set the directory of the file's location in your computer and then read it so that R can download the data
 setwd("E:/DATA ANALYTICS JOURNEY/R Edvancer/PROJECT 1 REAL ESTATE")
 re_train=read.csv("housing_train.csv",stringsAsFactors = F)
 re_test= read.csv("housing_test.csv",stringsAsFactors = F)
 
 ##You will need same set of vars on both train and test,
 ##its easier to manage that if you combine train and test
-##in the beginning and then separate them once you are done with data prep
+##in the beginning and then separate them once you are done with data preparation
 ##We'll fill test's response column with NAs.
 re_test$Price=NA
 re_train$data='train'
@@ -14,7 +15,7 @@ re_all=rbind(re_train,re_test)
 library(dplyr)
 glimpse(re_all)
 
-##Next we'll create dummy vars for remaining categorical vars
+##Next we'll create dummy variables for remaining categorical variables
 ##using sapply for creating dummies
 char_logical=sapply(re_all,is.character)
 cat_cols=names(re_all)[char_logical]
@@ -24,7 +25,7 @@ cat_cols=cat_cols[!(cat_cols %in% c('data','Price'))]
 cat_cols
 
 # we are using frequency cutoff as 50, there is no magic number here,
-# lower cutoffs will simply result in more number of dummy vars
+# lower cutoffs will simply result in more number of dummy variables
 for(col in cat_cols){
   re_all=CreateDummies(re_all,col,50)
 }
@@ -45,7 +46,7 @@ for(col in names(re_all)){
 re_train=re_all %>% filter(data=='train') %>% select(-data)
 re_test=re_all %>% filter(data=='test') %>% select(-data,-Price)
 
-##Lets build a model on training data by checking VIF
+##Lets build a model on training data by checking VIF values as we need to remove multicollinearity
 fit=lm(Price~.,data=re_train)
 library(car)
 sort(vif(fit),decreasing = T)[1:3]
@@ -344,35 +345,44 @@ fit=lm(Price~.-CouncilArea_-Postcode-Distance-Suburb_NorthMelbourne
        -CouncilArea_Manningham-CouncilArea_Stonnington-CouncilArea_Darebin,data=re_train)
 summary(fit)
 
-
+#After removing VIF values > 10 we now make a prediction on our test data based on our Linear Regression model that we built
 test.predictions=predict(fit,newdata=re_test)
 write.csv(test.predictions,'Futureprices.csv',row.names = F)
 
-#QUIZ----1st question
+#-QUIZ------------------------------------------------------------------------------------------------------------
+#1st question - Find the variance of the target variable 'Price'
 var(re_train$Price)
 
-##2nd question
+##2nd question - Find out how many observations have missing values for variable 'YearBuilt'?
 library(dplyr)
 sum(is.na(re_train$YearBuilt))
 
-##3rd question
+##3rd question - What is the difference in average price between house type h and t?
 mean(re_train$Type_h)-mean(re_train$Type_t)
 
-##4th
+##4th - How many unique values variable postcode takes?
 unique(re_train$Postcode)
 
-#5th is numeric
+#5th - how should you treat post code . As a categorical variable or numeric variable ? 
+#Ans - numeric
 
-#6th
+#6th - Does distance follow a normal distribution?
+#Ans - No
 library(dplyr)
 library(ggplot2)
 ggplot(re_train,aes(x=Distance))+geom_histogram()
 
-#7th Jellis thru excel..dont know R
+#7th - Which seller has maximum value transactions? ( Sum of Price)
+#Ans - Jellis
 
-#8th...how to find the name if u know the value
-which.max(mean(re_train$Price))
-which.max(mean(re_train$CouncilArea_&&re_train$Price))
+#8th - Which CouncilArea has maximum average price?
+#Ans - Bayside
 
+#9th - which CouncilArea has maximum variance in the price?
+#Ans - Stonnington
 
+#10th - Should we use Address as is in the modeling process?
+#Ans  - No, we can break it down
+
+#-------------------------------------------------------------------------------------------------------------------
 
