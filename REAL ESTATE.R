@@ -65,6 +65,8 @@ fit=lm(Price~.,data=re_train)
 fit=step(fit)
 
 summary(fit)
+
+#We need to remove objects with high p-values (p > 0.05)
 fit=lm(Price~.-CouncilArea_-Postcode-Distance-Suburb_NorthMelbourne,data=re_train)
 summary(fit)
 fit=lm(Price~.-CouncilArea_-Postcode-Distance-Suburb_NorthMelbourne
@@ -345,11 +347,12 @@ fit=lm(Price~.-CouncilArea_-Postcode-Distance-Suburb_NorthMelbourne
        -CouncilArea_Manningham-CouncilArea_Stonnington-CouncilArea_Darebin,data=re_train)
 summary(fit)
 
-#After removing VIF values > 10 we now make a prediction on our test data based on our Linear Regression model that we built
+#After removing VIF values > 10 and p values >0.05 we now make a prediction on our test data 
+#based on our Linear Regression model that we built
 test.predictions=predict(fit,newdata=re_test)
 write.csv(test.predictions,'Futureprices.csv',row.names = F)
 
-#-QUIZ------------------------------------------------------------------------------------------------------------
+#--------------------------------------------QUIZ------------------------------------------------------------------------------------
 #1st question - Find the variance of the target variable 'Price'
 var(re_train$Price)
 
